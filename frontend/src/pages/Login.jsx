@@ -44,7 +44,7 @@ export const Login = () => {
       // console.log(response);
     } catch (error) {
       console.log(error);
-      if (!error.response.data.success) {
+      if (!error.response.data.succes) {
         setError(error.response.data.error);
         setTimeout(() => {
           setError("");
@@ -113,3 +113,4 @@ export const Login = () => {
     </div>
   );
 };
+

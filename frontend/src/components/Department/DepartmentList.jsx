@@ -5,8 +5,9 @@ import DataTable from "react-data-table-component";
 import { columns, DepartmentActionButtons } from "../../utils/DepartmentHelper";
 
 export const DepartmentList = () => {
-  const [departments, setDepartments] = useState();
+  const [departments, setDepartments] = useState([]);
   const [depLoading, setdepLoading] = useState(false);
+  const [filteredDepartments, setFilteredDepartments] = useState([]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -22,15 +23,15 @@ export const DepartmentList = () => {
         );
 
         if (response.data.success) {
-          console.log(response.data);
           let sno = 1;
-          const data = await response.data.departments.map((dep) => ({
+          const data = response.data.departments.map((dep) => ({
             _id: dep._id,
             sno: sno++,
             dep_name: dep.dep_name,
             action: <DepartmentActionButtons _id={dep._id} />,
           }));
           setDepartments(data);
+          setFilteredDepartments(data);
         }
       } catch (error) {
         if (error.response && !error.response.data.success) {
@@ -43,6 +44,15 @@ export const DepartmentList = () => {
 
     fetchDepartments();
   }, []);
+
+  const filterDepartments = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const records = departments.filter((dep) =>
+      dep.dep_name.toLowerCase().includes(searchTerm)
+    );
+    setFilteredDepartments(records);
+  };
+
   return (
     <>
       {depLoading ? (
@@ -57,6 +67,7 @@ export const DepartmentList = () => {
               type="text"
               placeholder="Search by Dep Name"
               className="px-4 py-0.5"
+              onChange={filterDepartments}
             />
             <Link
               to={"/admin-dashboard/add-department"}
@@ -66,10 +77,11 @@ export const DepartmentList = () => {
           </div>
 
           <div>
-            <DataTable columns={columns} data={departments} />
+            <DataTable columns={columns} data={filteredDepartments} pagination />
           </div>
         </div>
       )}
     </>
   );
 };
+

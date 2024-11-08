@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const EditDepartment = () => {
   const { id } = useParams();
@@ -9,22 +10,25 @@ export const EditDepartment = () => {
     description: "",
   });
   const [depLoading, setDeploading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDepartment = async () => {
       setDeploading(true);
       try {
-        const response = await axios.get(`http://localhost:3000/api/department/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        
-        
+        const response = await axios.get(
+          `http://localhost:3000/api/department/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
         if (response.data) {
           setDepartment({
-            dep_name: response.data.department.dep_name , 
-            description: response.data.department.description , 
+            dep_name: response.data.department.dep_name,
+            description: response.data.department.description,
           });
         } else {
           console.error("API did not return department data");
@@ -40,13 +44,32 @@ export const EditDepartment = () => {
     if (id) fetchDepartment();
   }, [id]);
 
-
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDepartment((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/api/department/${id}`,
+        department,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.succes) {
+        navigate('/admin-dashboard/departments')
+      }
+    } catch (error) {
+      if (error.response && !error.response.data.success) {
+        alert(error.response.data.error);
+      }
+    }
+  };
   return (
     <>
       {depLoading ? (
@@ -56,7 +79,7 @@ export const EditDepartment = () => {
           <h2 className="text-2xl font-bold mb-6 text-center">
             Edit Department
           </h2>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="dep_name"

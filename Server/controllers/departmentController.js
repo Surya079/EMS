@@ -1,6 +1,6 @@
 import { Department } from "../models/Department.js";
 
-const getDepartment = async (req, res) => {
+const getDepartments = async (req, res) => {
   try {
     const departments = await Department.find();
     return res.status(200).json({ success: true, departments });
@@ -29,11 +29,11 @@ const addDepartment = async (req, res) => {
   }
 };
 
-const EditDepartment = async (req, res) => {
-  const { id } = req.params;
+const getDepartment = async (req, res) => {
   try {
+    const { id } = req.params;
     const department = await Department.findById({ _id: id });
-    
+
     return res.status(200).json({ succes: true, department });
   } catch (error) {
     console.log(error);
@@ -43,4 +43,45 @@ const EditDepartment = async (req, res) => {
   }
 };
 
-export { addDepartment, getDepartment, EditDepartment };
+const updateDepartment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { dep_name, description } = req.body;
+
+    const department = await Department.findByIdAndUpdate(
+      { _id: id },
+      {
+        dep_name,
+        description,
+      }
+    );
+
+    return res.status(200).json({ succes: true, department });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error in department" });
+  }
+};
+
+const deleteDepartment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Department.findByIdAndDelete({ _id: id });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Department deleted successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error in department" });
+  }
+};
+export {
+  addDepartment,
+  getDepartments,
+  getDepartment,
+  updateDepartment,
+  deleteDepartment,
+};

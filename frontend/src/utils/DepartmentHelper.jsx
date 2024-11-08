@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const columns = [
   {
@@ -8,6 +10,7 @@ export const columns = [
   {
     name: "Department",
     selector: (row) => row.dep_name,
+    sortable:true
   },
   {
     name: "Action",
@@ -18,6 +21,23 @@ export const columns = [
 export const DepartmentActionButtons = ({ _id }) => {
   const navigate = useNavigate();
 
+  const deleteDepartment = async () => {
+    const confirmByUser = window.confirm("Are you sure you want to delete?");
+    try {
+      if (confirmByUser) {
+        await axios.delete(`http://localhost:3000/api/department/${_id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      }
+
+      navigate(0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex space-x-2">
       <button
@@ -25,7 +45,11 @@ export const DepartmentActionButtons = ({ _id }) => {
         onClick={() => navigate(`/admin-dashboard/department/${_id}`)}>
         Edit
       </button>
-      <button className="px-3 py-1 bg-red-400">Delete</button>
+      <button
+        className="px-3 py-1 bg-red-400"
+        onClick={() => deleteDepartment()}>
+        Delete
+      </button>
     </div>
   );
 };
